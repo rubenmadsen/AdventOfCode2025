@@ -6,5 +6,4 @@
 
 char *fileDump(const char* filename);
 
-
 #endif
