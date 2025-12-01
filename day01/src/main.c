@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../../stdlib/file.h"
 int wrap(int value, int max);
-void wrapCount(int *value, int max, int *count);
+int wrapCount(int dial, int move, int *passes);
 
 int main(){
     if(chdir("/Users/rubenmadsen/Advent of code/2025/day01") != 0){
@@ -12,6 +12,7 @@ int main(){
     }
     char *data = fileDump("main_input1.txt");
     //printf("Data: %s\n", data);
+    FILE *out = fopen("output.txt", "w");
 
     char *tok = strtok(data, "\n");
     int dial = 50;
@@ -27,13 +28,11 @@ int main(){
         //printf(" %d\n", num);
         tok = strtok(NULL, "\n");
         int count = 0;
-
-        // printf("%d + %d = %d mod %d\n", dial, num, dial + num, wrap(dial + num, 100));
         int pDial = dial;
-        dial += num;
-        wrapCount(&dial , 100, &count);
-        // printf("r:%d %d v: %d c: %d\n", row++ ,dial, num, count);
-        printf("row:%d dial:%d move:%d passes:%d dialresult:%d\n",row++, pDial, num, count, dial);
+        dial = wrapCount(dial, num, &count);
+        
+        fprintf(out, "row:%d dial:%d move:%d passes:%d dial after:%d\n",row++, pDial, num, count, dial);
+        printf("row:%d dial:%d move:%d passes:%d dial after:%d\n",row++, pDial, num, count, dial);
         points += count;
         count = 0;
     }
@@ -42,27 +41,26 @@ int main(){
     return 0;
 }
 
+
 int wrap(int value, int max){
     value %= max; 
     if(value < 0) value += max;
     return value;
 }
+int wrapCount(int dial, int move, int *passes){
+    *passes = 0;
 
-void wrapCount(int *value, int max, int *count){
-    if (*value >= max){
-        *value -= max;
-        (*count)++;
-        wrapCount(value, max, count);
-        return;
+    int direction = (move >= 0 ? 1 : -1);
+    int steps = abs(move);
+
+    for(int i = 0; i < steps; i++){
+        dial += direction;
+        if (dial == 100) dial = 0;
+        if (dial == -1) dial = 99;
+
+        if (dial == 0)
+            (*passes)++;
     }
-    if (*value < 0){
-        *value += max;
-        (*count)++;
-        wrapCount(value, max, count);
-        return;
-    }
-    if(value == 0){
-        (*count)++;
-        return;
-    }
+
+    return dial;
 }
