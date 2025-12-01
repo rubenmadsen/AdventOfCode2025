@@ -6,7 +6,9 @@ BUILD_DIR = build
 LIB_DIR = ../libs
 LIB_INCLUDE = ../libs/include
 
-SRC = $(wildcard $(SRC_DIR)/*.c)
+SRC = \
+	$(wildcard $(SRC_DIR)/*.c) \
+	$(wildcard ../stdlib/*.c)
 OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
 
 # All .a files in ../../libs
