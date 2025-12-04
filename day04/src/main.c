@@ -15,6 +15,9 @@ typedef struct Cell {
 void count_data_dimensions(char *data, int *rows, int * cols);
 void get_ats(int rows, int cols, Cell cells[rows][cols], Cell *cell);
 void print_grid(int rows, int cols, Cell cells[rows][cols]);
+void apply_ats(int rows, int cols, Cell cells[rows][cols]);
+void clear_ats(int rows, int cols, Cell cells[rows][cols]);
+int count_ats(int rows, int cols, Cell cells[rows][cols]);
 int main(){
     if(chdir("/Users/rubenmadsen/Advent of code/2025/day04") != 0){
         perror("chdir");
@@ -39,7 +42,7 @@ while (token && y < rows) {
         if (x < line_len)
             cells[y][x].c = token[x];
         else
-            cells[y][x].c = '.';   // pad with non-@ safe value
+            cells[y][x].c = '.';  
 
         cells[y][x].ats = 0;
     }
@@ -47,22 +50,64 @@ while (token && y < rows) {
     y++;
     token = strtok(NULL, "\n");
 }
+    int count = 0;
     int accessible = 0;
+    int count_before = count_ats( rows, cols, cells);
+    do{    
+        accessible = 0;
+        for (size_t y = 0; y < rows; y++){
+            for (size_t x = 0; x < cols; x++){
+                Cell *cell = &cells[y][x];
+                get_ats(rows, cols, cells, cell);
+                if (cell->ats < 4 && cell->c == '@')
+                {
+                    accessible++;
+                }
+                
+            }
+            count += accessible;
+        }
+        printf("%d\n", accessible);
+        apply_ats(rows, cols, cells);
+        clear_ats(rows, cols, cells);
+        print_grid(rows, cols, cells);
+    } while (accessible != 0);
+    int count_after = count_ats( rows, cols, cells);
+
+    printf("%d\n", count_before-count_after);
+    print_grid(rows, cols, cells);
+    return 0;
+}
+int count_ats(int rows, int cols, Cell cells[rows][cols]){
+    int count = 0;
     for (size_t y = 0; y < rows; y++){
         for (size_t x = 0; x < cols; x++){
             Cell *cell = &cells[y][x];
-            get_ats(rows, cols, cells, cell);
-            if (cell->ats < 4 && cell->c == '@')
-            {
-                accessible++;
+            if(cell->c == '@'){
+                count++;
             }
-            
         }
     }
-    
-    printf("%d\n", accessible);
-    print_grid(rows, cols, cells);
-    return 0;
+    return count;
+}
+void apply_ats(int rows, int cols, Cell cells[rows][cols]){
+    for (size_t y = 0; y < rows; y++){
+        for (size_t x = 0; x < cols; x++){
+            Cell *cell = &cells[y][x];
+            if(cell->ats < 4 && cell->c == '@'){
+                cell->c = '.';
+            }
+        }
+    }
+}
+
+void clear_ats(int rows, int cols, Cell cells[rows][cols]){
+    for (size_t y = 0; y < rows; y++){
+        for (size_t x = 0; x < cols; x++){
+            Cell *cell = &cells[y][x];
+            cell->ats = 0;
+        }
+    }
 }
 
 void get_ats(int rows, int cols, Cell cells[rows][cols], Cell *cell){
@@ -95,11 +140,11 @@ void get_ats(int rows, int cols, Cell cells[rows][cols], Cell *cell){
 void print_grid(int rows, int cols, Cell cells[rows][cols]) {
     for (int y = 0; y < rows; y++) {
         for (int x = 0; x < cols; x++) {
-
-            if (cells[y][x].ats < 4)
-                putchar('x');
-            else
-                putchar(cells[y][x].c);
+            putchar(cells[y][x].c);
+            // if (cells[y][x].ats < 4)
+            //     putchar('x');
+            // else
+            //     putchar(cells[y][x].c);
 
         }
         putchar('\n');
