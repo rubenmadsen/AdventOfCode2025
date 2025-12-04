@@ -14,7 +14,7 @@ struct RMTNode{
 RMTNode *RMTNode_create(){
     RMTNode *node = (RMTNode *)malloc(sizeof(RMTNode));
     node->parent = NULL;
-    node->child_count = RMLinkedList_create();
+    node->children = RMLinkedList_create();
     node->ref = NULL;
     node->child_count = 0;
     return node;
