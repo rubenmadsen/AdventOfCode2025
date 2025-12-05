@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include "../../stdlib/file.h"
 #include <stdbool.h>
+#include <string.h>
 
 bool example = true;
 int main(){
