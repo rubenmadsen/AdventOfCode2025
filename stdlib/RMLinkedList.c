@@ -247,7 +247,6 @@ void RMLinkedList_sort(RMLinkedList *list, bool (*cmp)(void *A, void *B)) {
     pthread_mutex_lock(list->wlock);
 
     bool swapped;
-
     do {
         swapped = false;
         RMLinkedListItem *cur = list->head;
@@ -256,8 +255,7 @@ void RMLinkedList_sort(RMLinkedList *list, bool (*cmp)(void *A, void *B)) {
             void *A = cur->item;
             void *B = cur->next->item;
 
-            // If comparator says A should come AFTER B, swap items
-            if (!cmp(A, B)) {
+            if (!cmp(A, B)) {        // swap if A should come after B
                 cur->item = B;
                 cur->next->item = A;
                 swapped = true;
@@ -265,7 +263,6 @@ void RMLinkedList_sort(RMLinkedList *list, bool (*cmp)(void *A, void *B)) {
 
             cur = cur->next;
         }
-
     } while (swapped);
 
     pthread_mutex_unlock(list->wlock);

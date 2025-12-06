@@ -3,7 +3,7 @@
 #include "../../stdlib/file.h"
 #include <stdbool.h>
 #include <string.h>
-#include "RMLinkedList.h"
+#include "../../stdlib/RMLinkedList.h"
 #include "RMIterator.h"
 
 
@@ -11,11 +11,8 @@ typedef struct Range{
     uint64_t start;
     uint64_t end;
 } Range;
-
-bool sort(Range *A, Range *B){
-    return A->start < B->start;
-}
-
+bool sort(void *A, void *B);
+void removeDuplicates(RMLinkedList *list);
 bool inRange(Range *range, uint64_t target);
 bool inList(uint64_t target);
 bool findIndex(uint64_t target);
@@ -65,39 +62,65 @@ int main(){
         }
        row = strtok_r(NULL, "\n", &save2);
     }
-    printf("Available:%llu\n", available);
+    printf("Available:%llu\n\n", available);
     //
-    //
+    // Part 2
     //
     fresh = 0;
+    
+    RMLinkedList_sort(list, sort);
     RMLinkedListItem *cur = list->head;
-    indicies = RMLinkedList_create();
-    while(cur){
-        Range *range = (Range *)cur->item;
+   
+    cur = list->head;
+    while (cur->next){
         
-        for(uint64_t i=range->start; i<=range->end; i++){
-            if(findIndex(i))
-                continue;
+        Range *current = cur->item;
+        Range *next = cur->next->item;
 
-            uint64_t *index = malloc(sizeof(uint64_t));
-            *index = i;
-            RMLinkedList_push(indicies, index);
-            fresh++;
-          
+        // If before 
+        if(current->start < next->start && current->end < next->start){
+            
         }
+        // If within
+        else if(inRange(next, current->start) && inRange(next, current->end)){
+            RMLinkedList_popItem(list, cur);
+        
+        }
+        else{
+            current->end = next->start-1;
+            if(current->end < current->start)
+                current->end = current->start;
+        }
+        
         cur = cur->next;
+         // uint64_t offset = ((Range *)list->head->item)->start;
+    // while (cur->next){
+    //     Range *range = cur->item;
+    //     range->start -= offset;
+    //     range->end -= offset;
+    //     cur = cur->next;
+    // }
     }
-        printf("Fresh:%llu\n", fresh);
+    removeDuplicates(list);
+        
     // cur = indicies->head;
     // while (cur){
     //     printf("%llu, ", cur->item);
     //     cur = cur->next;
-    // }
-    
+    // // 344771884978261
+    // // 330297823873817
+    cur = list->head;
+    while (cur){
+        Range *current = cur->item;
+        fresh += current->end - current->start;
+        printf("Range: %llu -> %llu = %llu\n", current->start, current->end, current->end - current->start);
+        cur = cur->next;
+    }
+    cur = list->head;
+    printf("\nFresh:%llu\n", fresh);
+
     return 0;
 }
-
-
 
 bool findIndex(uint64_t target){
     RMLinkedListItem *cur = indicies->head;
@@ -110,11 +133,34 @@ bool findIndex(uint64_t target){
     }
     return false;
 }
+void removeDuplicates(RMLinkedList *list) {
+    RMLinkedListItem *cur = list->head;
+
+    while (cur != NULL) {
+        Range *a = cur->item;
+
+        RMLinkedListItem *runner = cur->next;
+
+        while (runner != NULL) {
+            RMLinkedListItem *next = runner->next;
+            Range *b = runner->item;
+
+            if (a->start == b->start && a->end == b->end) {
+                // b is a duplicate of a
+                RMLinkedList_popItem(list, b);
+            }
+
+            runner = next;
+        }
+
+        cur = cur->next;
+    }
+}
 
 
 bool inRange(Range *range, uint64_t target){
-    char *res = (target >= range->start && target <= range->end) ? "yes":"no";
-    printf("Is %d in range %d - %d.  ->  %s\n", target, range->start, range->end, res);
+    //char *res = (target >= range->start && target <= range->end) ? "yes":"no";
+    //printf("Is %d in range %d - %d.  ->  %s\n", target, range->start, range->end, res);
     return (target >= range->start && target <= range->end);
 }
 
@@ -128,10 +174,18 @@ bool inList(uint64_t target){
     }
     return false;
 }
+
 uint64_t parse(char *s){
-    printf("parsing:%s ", s);
+    // printf("parsing:%s ", s);
     char *end;
     long long v = strtoll(s, &end, 10);
-    printf("to:%llu\n", v);
+    // printf("to:%llu\n", v);
     return v;
+}
+
+bool sort(void *A, void *B) {
+    Range *a = (Range*)A;
+    Range *b = (Range*)B;
+    // printf("Sorting:%llu and %llu\n", a->start, b->start);
+    return a->start <= b->start;
 }
