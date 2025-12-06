@@ -44,6 +44,10 @@ void RMLinkedList_clear(RMLinkedList *list);
 bool RMLinkedList_exists(RMLinkedList *list, void *item);
 void *RMLinkedList_head(RMLinkedList *list);
 void *RMLinkedList_tail(RMLinkedList *list);
+
+//// Sorting
+void RMLinkedList_sort(RMLinkedList *list, bool (*cmp)(void *A, void *B));
+
 //// Iterator
 RMIterator *RMLinkedList_iterator(RMLinkedList *list);
 

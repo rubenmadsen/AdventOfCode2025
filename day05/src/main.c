@@ -6,25 +6,23 @@
 #include "RMLinkedList.h"
 #include "RMIterator.h"
 
-#define ForEach(iterator, lambda)        \
-{                                        \
-    RMIterator *it = iterator;           \
-    while (it->hasNext) {                \
-        void *item = it->item;           \
-        lambda                           \
-        it->next(it);                    \
-    }                                    \
-    free(it);                            \
-}
 
 typedef struct Range{
     uint64_t start;
     uint64_t end;
 } Range;
+
+bool sort(Range *A, Range *B){
+    return A->start < B->start;
+}
+
 bool inRange(Range *range, uint64_t target);
 bool inList(uint64_t target);
+bool findIndex(uint64_t target);
 uint64_t parse(char *s);
 RMLinkedList *list;
+RMLinkedList *indicies;
+uint64_t fresh = 0;
 
 bool example = false;
 int main(){
@@ -42,8 +40,8 @@ int main(){
     // printf("First:%s\n",first);
     // printf("Second:%s\n", second);
 
-    char *save;
-    char *row = strtok_r(first, "\n", &save);
+    char *save1;
+    char *row = strtok_r(first, "\n", &save1);
 
     while (row){
         char *first_num = strtok(row, "-");
@@ -55,22 +53,63 @@ int main(){
         range->start = fnum;
         range->end = snum;
         RMLinkedList_push(list, range);
-        row = strtok_r(NULL, "\n", &save);
+        row = strtok_r(NULL, "\n", &save1);
     }
-    row = strtok_r(second, "\n", &save);
+    char *save2;
+    row = strtok_r(second, "\n", &save2);
     uint64_t available = 0;
     while(row){
         uint64_t num = parse(row);
         if(inList(num)){
             available++;
         }
-       row = strtok_r(NULL, "\n", &save);
+       row = strtok_r(NULL, "\n", &save2);
     }
     printf("Available:%llu\n", available);
+    //
+    //
+    //
+    fresh = 0;
+    RMLinkedListItem *cur = list->head;
+    indicies = RMLinkedList_create();
+    while(cur){
+        Range *range = (Range *)cur->item;
+        
+        for(uint64_t i=range->start; i<=range->end; i++){
+            if(findIndex(i))
+                continue;
+
+            uint64_t *index = malloc(sizeof(uint64_t));
+            *index = i;
+            RMLinkedList_push(indicies, index);
+            fresh++;
+          
+        }
+        cur = cur->next;
+    }
+        printf("Fresh:%llu\n", fresh);
+    // cur = indicies->head;
+    // while (cur){
+    //     printf("%llu, ", cur->item);
+    //     cur = cur->next;
+    // }
+    
     return 0;
 }
 
 
+
+bool findIndex(uint64_t target){
+    RMLinkedListItem *cur = indicies->head;
+    while(cur){
+        if (*(uint64_t *)cur->item == target){
+            return true;
+        }
+        
+        cur = cur->next;
+    }
+    return false;
+}
 
 
 bool inRange(Range *range, uint64_t target){

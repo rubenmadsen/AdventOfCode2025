@@ -240,6 +240,36 @@ bool RMLinkedList_exists(RMLinkedList *list, void *item) {
     }
     return false;
 }
+// Sorting interface
+void RMLinkedList_sort(RMLinkedList *list, bool (*cmp)(void *A, void *B)) {
+    if (!list || list->count < 2) return;
+
+    pthread_mutex_lock(list->wlock);
+
+    bool swapped;
+
+    do {
+        swapped = false;
+        RMLinkedListItem *cur = list->head;
+
+        while (cur != NULL && cur->next != NULL) {
+            void *A = cur->item;
+            void *B = cur->next->item;
+
+            // If comparator says A should come AFTER B, swap items
+            if (!cmp(A, B)) {
+                cur->item = B;
+                cur->next->item = A;
+                swapped = true;
+            }
+
+            cur = cur->next;
+        }
+
+    } while (swapped);
+
+    pthread_mutex_unlock(list->wlock);
+}
 
 // RMIterator interface
 void RMLinkedList_next(RMIterator *it) {
