@@ -3,6 +3,7 @@
 #include "../../stdlib/file.h"
 #include <stdbool.h>
 #include <string.h>
+#include "../../stdlib/common.h"
 
 bool example = true;
 int main(){
